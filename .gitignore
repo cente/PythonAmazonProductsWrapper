@@ -46,3 +46,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 config.txt
+.sync/ID
+.sync/IgnoreList
+.sync/StreamsList
