@@ -35,7 +35,7 @@ try:
 except:
     raise InputError('API URL Not Set or Invalid, pass me the -c argument to generate a new config')
 
-mport argparse # Built in
+import argparse # Built in
 parser = argparse.ArgumentParser(description='This is an Amazon Products API script written in Python by Brendon Conley.',
     formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument('operation', metavar='operation',choices=['ItemLookup', 'GenerateConfig'] ,
@@ -58,24 +58,31 @@ def createSignedRequest (secret,s):
     dig = hmac.new(b'1234567890', msg=s.encode('utf-8'), digestmod=hashlib.sha256).digest()
     base64.b64encode(dig).decode()
 
+from datetime import datetime
+
 
 if args.operation=='ItemLookup':
-    print ('operation matches')
-    if len(args.keywords)==1:
-        print (args.keywords[0])
-        import requests
-        payload={
-        'AWSAccessKeyId':awspubkey,
-        'AssociateTag':awstag,
-        'ItemId':args.keywords,
-        'Operation':'ItemLookup',
-        'ResponseGroup':'Images%2CItemAttributes%2COffers%2CReviews',
-        'Service':'AWSECommerceService',
-        'timestamp':datetime.utcnow().isoformat() + 'Z',
-        'version':'2013-08-01'}
-        print (payload)
+    apiurl="http://www.amazon.com"
+    params= {
+    'AWSAccessKeyId':awspubkey,
+    'AssociateTag':awstag,
+    'ItemId':args.keywords,
+    'timestamp':datetime.utcnow().isoformat() + 'Z',
+    'version':'2013-08-01',
+    'ResponseGroup':'Images%2CItemAttributes%2COffers%2CReviews',
+    'Operation':'ItemLookup',
+    'Service':'AWSECommerceService'}
+
+    from requests import Session, Request
+    print ('params:',params)
+    p = Request('GET', apiurl, params=params).prepare()
+    print(p.url)
 
 
+#
+#
+#p.body                     p.headers                  p.path_url                 p.prepare_body(            p.prepare_headers(         p.prepare_url(
+#p.deregister_hook(         p.method                   p.prepare_auth(            p.prepare_cookies(         p.prepare_method(          p.url
 
 
 print (args.keywords[0])

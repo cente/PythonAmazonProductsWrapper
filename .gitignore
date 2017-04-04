@@ -49,3 +49,6 @@ config.txt
 .sync/ID
 .sync/IgnoreList
 .sync/StreamsList
+config.ini
+.sync/Archive/amazon.py
+config.ini
