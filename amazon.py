@@ -60,10 +60,12 @@ def createSignedRequest (secret,s):
 
 from datetime import datetime
 
-
 if args.operation=='ItemLookup':
-    apiurl="http://www.amazon.com"
-    params= {
+    import collections
+    #apiurl="http://www.amazon.com"
+    #print(apiurl)
+    #print(type(apiurl))
+    params={
     'AWSAccessKeyId':awspubkey,
     'AssociateTag':awstag,
     'ItemId':args.keywords,
@@ -72,9 +74,11 @@ if args.operation=='ItemLookup':
     'ResponseGroup':'Images%2CItemAttributes%2COffers%2CReviews',
     'Operation':'ItemLookup',
     'Service':'AWSECommerceService'}
+    for key in sorted(params.iterkeys()):
+        print "%s: %s" % (key, params[key])
+
 
     from requests import Session, Request
-    print ('params:',params)
     p = Request('GET', apiurl, params=params).prepare()
     print(p.url)
 
@@ -84,8 +88,6 @@ if args.operation=='ItemLookup':
 #p.body                     p.headers                  p.path_url                 p.prepare_body(            p.prepare_headers(         p.prepare_url(
 #p.deregister_hook(         p.method                   p.prepare_auth(            p.prepare_cookies(         p.prepare_method(          p.url
 
-
-print (args.keywords[0])
 # Responsegroup Values
 # Valid Values: Accessories | BrowseNodes | EditorialReview | Images | ItemAttributes | ItemIds | Large | Medium | OfferFull | Offers | PromotionSummary | OfferSummary| RelatedItems$
 
