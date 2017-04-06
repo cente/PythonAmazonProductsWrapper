@@ -26,7 +26,7 @@ except:
     raise InputError('AWS Access Key Not Set or Invalid pass me the -c argument to generate a new config')
 
 try:
-    awsprivkey=config['Amazon Account Settings']['AWSSecretKey']
+    awsprivkey=config['Amazon Account Settings']['AWSSecretKey'].encode()
 except:
     raise InputError('AWS Secret Key Not Set or Invalid, pass me the -c argument to generate a new config')
 
@@ -49,52 +49,46 @@ args = parser.parse_args()
 if args.operation and args.keywords is None:
     parser.error("Operation requires keyword(s)")
 
-
-
-def createSignedRequest (secret,s):
-    import hmac
-    import hashlib
-    import base64
-    dig = hmac.new(b'1234567890', msg=s.encode('utf-8'), digestmod=hashlib.sha256).digest()
-    base64.b64encode(dig).decode()
-
 from datetime import datetime
+
+
+def get_timestamp():
+    from time import gmtime, strftime
+    return strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
+
+
 
 if args.operation=='ItemLookup':
     import collections
-    #apiurl="http://www.amazon.com"
-    #print(apiurl)
-    #print(type(apiurl))
-    params={
+    preparams={
     'AWSAccessKeyId':awspubkey,
     'AssociateTag':awstag,
     'ItemId':args.keywords,
-    'timestamp':datetime.utcnow().isoformat() + 'Z',
-    'version':'2013-08-01',
-    'ResponseGroup':'Images%2CItemAttributes%2COffers%2CReviews',
+    'Timestamp':get_timestamp(),
+    'ResponseGroup':'Images,ItemAttributes,Offers',
     'Operation':'ItemLookup',
+    'IdType':'ASIN',
     'Service':'AWSECommerceService'}
-    for key in sorted(params.iterkeys()):
-        print "%s: %s" % (key, params[key])
 
-
+    params= collections.OrderedDict(sorted(preparams.items()))
     from requests import Session, Request
-    p = Request('GET', apiurl, params=params).prepare()
-    print(p.url)
-
-
-#
-#
-#p.body                     p.headers                  p.path_url                 p.prepare_body(            p.prepare_headers(         p.prepare_url(
-#p.deregister_hook(         p.method                   p.prepare_auth(            p.prepare_cookies(         p.prepare_method(          p.url
-
+    p = Request('GET', apiurl, params=params).prepare() # I'm just url-fying the params here, which alphebetizes, converts bad characters, and sorts them
+    import re
+    matchObj = re.match('.*\?(.*)', p.url) # I really just want the stuff that comes after the ? in the url
+    prerequest='GET' + '\n'+ \
+        'webservices.amazon.com' + '\n'+ \
+        '/onca/xml' + '\n'+ \
+        matchObj.group(1) # Getting it ready for the encoding process
+    print(prerequest)
+    import hmac
+    import hashlib
+    import base64
+    signature=base64.b64encode(hmac.new(awsprivkey, msg=prerequest.encode('utf-8'), digestmod=hashlib.sha256).digest()) #actual encoding cause amazon likes urls that can work in emails
+    params.update({'Signature':signature}) # adding the signature hash to the end of the url
+    goodun=Request('GET', apiurl, params=params).prepare()
+    print ('Good Url : ', goodun.url)
+    s = Session()
+    resp=s.send(goodun)
+    print (resp.text)
 # Responsegroup Values
 # Valid Values: Accessories | BrowseNodes | EditorialReview | Images | ItemAttributes | ItemIds | Large | Medium | OfferFull | Offers | PromotionSummary | OfferSummary| RelatedItems$
-
-
-
-
-
-
-# Responsegroup Values
-# Valid Values: Accessories | BrowseNodes | EditorialReview | Images | ItemAttributes | ItemIds | Large | Medium | OfferFull | Offers | PromotionSummary | OfferSummary| RelatedItems | Reviews | SalesRank | Similarities | Small | Tracks | VariationImages | Variations (US only) | VariationSummary

@@ -53,3 +53,5 @@ config.ini
 .sync/Archive/amazon.py
 config.ini
 *.ini
+config.ini
+*.ini
