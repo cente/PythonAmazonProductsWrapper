@@ -38,12 +38,12 @@ GenerateConfig
 ### Arguments
 
 --product-id : ID(s) of products.
---id-type :
 
---response : Response group; can specify more than one, separated by a space. See http://docs.aws.amazon.com/AWSECommerceService/latest/DG/CHAP_ResponseGroupsList.html
+--id-type : ASIN, ISBN, UPC, EAN. Defaults to ASIN.
+
+--response : Response group; can specify more than one, separated by a space. Defaults to ItemAttributes. See http://docs.aws.amazon.com/AWSECommerceService/latest/DG/CHAP_ResponseGroupsList.html
 
 Valid Values: Accessories | BrowseNodes | EditorialReview | Images | ItemAttributes | ItemIds | Large | Medium | OfferFull | Offers | PromotionSummary | OfferSummary| RelatedItems$
-Defaults to ItemAttributes
 
 # Contribute
 
