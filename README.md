@@ -1,9 +1,6 @@
-# Intro
+# Introducing PAPW : Python Amazon Products Wrapper
 
-PAPW : Python Amazon Products Wrapper
-
-Another Amazon Wrapper, this time in Python! Made because everything out there that was written in Python is no longer updated, and because I'm using it as an engine for other projects. You're encouraged to do the same!
-
+Another Amazon Wrapper, this time in Python! Made because everything out there that was written in Python is no longer updated, and because I'm using it as an engine for other projects.
 
 # Requirements
 
@@ -14,28 +11,42 @@ Another Amazon Wrapper, this time in Python! Made because everything out there t
 
 # Arguments
 
-python3.6 amazon.py operation
+syntax:
 
-## Operation
+python3.6 amazon.py operation --otherarguments
+
+## Operations
 
 ### Amazon Operations
-Currently Implemented:
-ItemSearch
+#### Currently Implemented:
 
-Yet to be Implemented:
-BrowseNodeLookup
-ItemLookup
-SimilarityLookup
-CartAdd
-CartClear
-CartCreate
-CartGet
-CartModify
+##### ItemSearch
+
+The ItemSearch operation searches for items on Amazon. The Product Advertising API returns up to ten items per search results page.
+
+An ItemSearch request requires a search index and the value for at least one parameter. For example, you might use the BrowseNode parameter for Harry Potter books and specify the Books search index.
+
+Currently supported filters:
+
+* Keywords  
+
+#### Operations Yet to be Implemented:
+
+* BrowseNodeLookup
+* ItemLookup
+* SimilarityLookup
+* CartAdd
+* CartClear
+* CartCreate
+* CartGet
+* CartModify
 
 ### Script/Maintenance Operations
-GenerateConfig
 
-### Arguments
+* generateconfig - Creates a brand new config.ini
+* version - Output current version
+
+## Additional Arguments
 
 --product-id : ID(s) of products.
 
