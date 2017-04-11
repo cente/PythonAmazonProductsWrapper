@@ -1,3 +1,5 @@
+
+
 # This script is created for python 3.6.
 
 try:
@@ -38,16 +40,30 @@ except:
 import argparse # Built in
 parser = argparse.ArgumentParser(description='This is an Amazon Products API script written in Python by Brendon Conley.',
     formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('operation', metavar='operation',choices=['ItemLookup', 'GenerateConfig'] ,
+parser.add_argument('operation', metavar='operation',choices=['ItemLookup', 'GenerateConfig', 'ExtendedHelp'] ,
     help="Required. What are we doing? \n ItemLookup : Looks up a single item. \n GenerateConfig : Creates a new config.ini in the same directory the script runs in")
-parser.add_argument('--keywords', "-k", metavar='keyword1, keyword2, keyword3',
-    help='Used for ItemLookup',
-    dest='keywords',
+parser.add_argument('--id', "-i", metavar='itemid',
+    help='The Amazon ID number. You can specify up to 10 at a time.',
+    dest='aid',
     nargs='*')
+parser.add_argument('--idtype', "-t", metavar='responses',
+    help='Used with -id to change from Amazon ID to SKU/UPC/EAN/ISBN ',
+    dest='idtype',
+    nargs='*')
+
+
+
+
+
 
 args = parser.parse_args()
 if args.operation and args.keywords is None:
     parser.error("Operation requires keyword(s)")
+
+
+
+
+
 
 from datetime import datetime
 
@@ -55,6 +71,7 @@ from datetime import datetime
 def get_timestamp():
     from time import gmtime, strftime
     return strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
+
 
 
 
