@@ -1,7 +1,15 @@
 
 
 # This script is created for python 3.6.
-# Test
+
+# Imports here
+
+import sys
+import argparse # Built in
+import hmac
+import hashlib
+import base64
+from datetime import datetime
 
 try:
     import configparser # pip3.6 install configparser
@@ -12,9 +20,21 @@ except:
     print("Unexpected error:", sys.exc_info()[0])
     raise
 
+
+
+# Reusable Functions here
+
+def get_timestamp():
+    from time import gmtime, strftime
+    return strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
+
+# Classes
 class InputError(Exception):
     pass
 
+
+
+# Read the config into variables
 config = configparser.RawConfigParser()
 config.read("config.ini")
 
@@ -38,10 +58,12 @@ try:
 except:
     raise InputError('API URL Not Set or Invalid, pass me the -c argument to generate a new config')
 
-import argparse # Built in
+
+# Define and interpret the command line arguments
+
 parser = argparse.ArgumentParser(description='This is an Amazon Products API script written in Python by Brendon Conley.',
     formatter_class=argparse.RawTextHelpFormatter)
-parser.add_argument('operation', metavar='operation',choices=['ItemLookup', 'GenerateConfig', 'ExtendedHelp'] ,
+parser.add_argument('operation', metavar='operation',choices=['ItemLookup', 'GenerateConfig', 'ExtendedHelp', 'ItemSearch'] ,
     help="Required. What are we doing? \n ItemLookup : Looks up a single item. \n GenerateConfig : Creates a new config.ini in the same directory the script runs in")
 parser.add_argument('--id', "-i", metavar='itemid',
     help='The Amazon ID number. You can specify up to 10 at a time.',
@@ -51,32 +73,32 @@ parser.add_argument('--idtype', "-t", metavar='responses',
     help='Used with -id to change from Amazon ID to SKU/UPC/EAN/ISBN ',
     dest='idtype',
     nargs='*')
-
-
-
-
-
+parser.add_argument('--keyword', "-k", metavar='keyword',
+    help='Keyword for searches. If it contains a space, enclose it with double quotes ("search terms")',
+    dest='keyword')
 
 args = parser.parse_args()
-if args.operation and args.keywords is None:
-    parser.error("Operation requires keyword(s)")
+
+
+if args.operation=='ItemSearch':
+    # The ItemSearch operation searches for items on Amazon. The Product Advertising API returns up to ten items per search results page.
+    # An ItemSearch request requires a search index and the value for at least one parameter. For example, you might use the BrowseNode parameter for Harry Potter books and specify the Books search index.
+    if args.keyword is None:
+        parser.error("Operation Requires Keyword")
+    print(args.keyword)
 
 
 
 
-
-
-from datetime import datetime
-
-
-def get_timestamp():
-    from time import gmtime, strftime
-    return strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
 
 
 
 
 if args.operation=='ItemLookup':
+    print("Not Yet Implemented")
+    sys.exit( 0 )
+
+
     import collections
     preparams={
     'AWSAccessKeyId':awspubkey,
@@ -98,9 +120,7 @@ if args.operation=='ItemLookup':
         '/onca/xml' + '\n'+ \
         matchObj.group(1) # Getting it ready for the encoding process
     print(prerequest)
-    import hmac
-    import hashlib
-    import base64
+
     signature=base64.b64encode(hmac.new(awsprivkey, msg=prerequest.encode('utf-8'), digestmod=hashlib.sha256).digest()) #actual encoding cause amazon likes urls that can work in emails
     params.update({'Signature':signature}) # adding the signature hash to the end of the url
     goodun=Request('GET', apiurl, params=params).prepare()
