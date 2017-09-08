@@ -11,8 +11,9 @@ import hashlib
 import base64
 from datetime import datetime
 import collections
-from requests import Session, Request]
+from requests import Session, Request
 import re
+import xml.etree.ElementTree as ET
 
 
 try:
@@ -36,7 +37,38 @@ def get_timestamp():
 class InputError(Exception):
     pass
 
+def amazon(operation, keyword, searchcategory):
 
+    preparams={
+    'AWSAccessKeyId':awspubkey,
+    'AssociateTag':awstag,
+    'Keywords':keyword,
+    'SearchIndex':searchcategory,
+#    'ItemId':args.keyword,
+    'Timestamp':get_timestamp(),
+#    'ResponseGroup':'Images,ItemAttributes,Offers',
+    'Operation':operation,
+#    'IdType':'ASIN',
+    'Service':'AWSECommerceService'}
+#
+    params= collections.OrderedDict(sorted(preparams.items()))
+#
+    p = Request('GET', apiurl, params=params).prepare() # I'm just url-fying the params here, which alphebetizes, converts bad characters, and sorts them
+#
+    matchObj = re.match('.*\?(.*)', p.url) # I really just want the stuff that comes after the ? in the url
+    prerequest='GET' + '\n'+ \
+        'webservices.amazon.com' + '\n'+ \
+        '/onca/xml' + '\n'+ \
+        matchObj.group(1) # Getting it ready for the encoding process
+    print(prerequest)
+#
+    signature=base64.b64encode(hmac.new(awsprivkey, msg=prerequest.encode('utf-8'), digestmod=hashlib.sha256).digest()) #actual encoding cause amazon likes urls that can work in emails
+    params.update({'Signature':signature}) # adding the signature hash to the end of the url
+    goodun=Request('GET', apiurl, params=params).prepare()
+    print ('Good Url : ', goodun.url)
+    s = Session()
+    resp=s.send(goodun)
+    print (resp.text)
 
 # Read the config into variables
 config = configparser.RawConfigParser()
@@ -80,8 +112,8 @@ parser.add_argument('--idtype', "-t", metavar='responses',
 parser.add_argument('--keyword', "-k", metavar='keyword',
     help='Keyword for searches. If it contains a space, enclose it with double quotes ("search terms")',
     dest='keyword')
-
 args = parser.parse_args()
+
 
 
 if args.operation=='ItemSearch':
@@ -89,48 +121,16 @@ if args.operation=='ItemSearch':
     # An ItemSearch request requires a search index and the value for at least one parameter. For example, you might use the BrowseNode parameter for Harry Potter books and specify the Books search index.
     if args.keyword is None:
         parser.error("Operation Requires Keyword")
-    print(args.keyword)
-
-
-
-
-
-
-
-
-if args.operation=='ItemLookup':
+    # response=amazon("ItemSearch", "the%20hunger%20games", "Books")
+    response=open('sampledata.xml', 'r') #temporary data so I don't need an active aws account
+    infile=response.read()
+    infile=infile.replace('\r', '').replace('\n', '')
+    m = re.search('.*(<Item>.*)', infile)
+    if m:
+            found=m.group(1)
+            xmlroot = ET.fromstring(found)
+            for Itemlink in xmlroot.findall('ItemLink'):
+                print(ItemLink.text)
+else:
     print("Not Yet Implemented")
     sys.exit( 0 )
-
-
-
-    preparams={
-    'AWSAccessKeyId':awspubkey,
-    'AssociateTag':awstag,
-    'ItemId':args.keywords,
-    'Timestamp':get_timestamp(),
-    'ResponseGroup':'Images,ItemAttributes,Offers',
-    'Operation':'ItemLookup',
-    'IdType':'ASIN',
-    'Service':'AWSECommerceService'}
-
-    params= collections.OrderedDict(sorted(preparams.items()))
-
-    p = Request('GET', apiurl, params=params).prepare() # I'm just url-fying the params here, which alphebetizes, converts bad characters, and sorts them
-
-    matchObj = re.match('.*\?(.*)', p.url) # I really just want the stuff that comes after the ? in the url
-    prerequest='GET' + '\n'+ \
-        'webservices.amazon.com' + '\n'+ \
-        '/onca/xml' + '\n'+ \
-        matchObj.group(1) # Getting it ready for the encoding process
-    print(prerequest)
-
-    signature=base64.b64encode(hmac.new(awsprivkey, msg=prerequest.encode('utf-8'), digestmod=hashlib.sha256).digest()) #actual encoding cause amazon likes urls that can work in emails
-    params.update({'Signature':signature}) # adding the signature hash to the end of the url
-    goodun=Request('GET', apiurl, params=params).prepare()
-    print ('Good Url : ', goodun.url)
-    s = Session()
-    resp=s.send(goodun)
-    print (resp.text)
-# Responsegroup Values
-# Valid Values: Accessories | BrowseNodes | EditorialReview | Images | ItemAttributes | ItemIds | Large | Medium | OfferFull | Offers | PromotionSummary | OfferSummary| RelatedItems$
